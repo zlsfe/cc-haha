@@ -167,7 +167,26 @@ echo "explain this code" | ./bin/claude-haha -p
 
 Windows 下启动脚本 `bin/claude-haha` 是 bash 脚本，无法在 cmd / PowerShell 中直接运行。请使用以下方式：
 
-**方式一：PowerShell / cmd 直接调用 Bun（推荐）**
+**方式一：全局命令（推荐）**
+
+将项目 `bin/` 目录加入系统 PATH，即可在任意目录直接启动：
+
+```powershell
+# 将 bin 目录加入用户 PATH（只需执行一次）
+$userPath = [Environment]::GetEnvironmentVariable("PATH", "User")
+$newPath = "$userPath;D:\你的路径\cc-haha\bin"
+[Environment]::SetEnvironmentVariable("PATH", $newPath, "User")
+```
+
+重启终端后，即可在任何目录运行：
+
+```powershell
+# 全局可用
+claude-haha
+claude-haha -p "your prompt here"
+```
+
+**方式二：PowerShell / cmd 直接调用 Bun**
 
 ```powershell
 # 交互 TUI 模式
