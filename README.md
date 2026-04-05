@@ -334,6 +334,46 @@ error: Cannot find package 'bundle' from '.../claude-code-haha/src/entrypoints/c
 bun upgrade
 ```
 
+### Q: 在原电脑安装过 Claude Code 后环境加载出错怎么办？
+
+**症状**：在新项目中出现配置不生效、使用了旧的 `~/.claude/settings.json` 而不是项目本地的配置。
+
+**原因分析**：
+
+1. **配置加载机制**：Claude Code 从 `settings.json` 读取应用设置（权限、插件等），这个文件的位置由 `getClaudeConfigHomeDir()` 决定：
+   ```ts
+   return process.env.CLAUDE_CONFIG_DIR ?? join(homedir(), '.claude')
+   ```
+   如果 `CLAUDE_CONFIG_DIR` 环境变量未设置，就会 fallback 到用户主目录的 `~/.claude/settings.json`。
+
+2. **启动脚本已加载 .env**：`bin/claude-haha.cmd` 通过 `--env-file` 参数加载了项目的 `.env` 文件，但 `.env` 中必须显式设置 `CLAUDE_CONFIG_DIR` 才能让 settings 从项目本地读取。
+
+3. **环境变量优先级**：Shell 环境变量 > `.env` 文件 > `~/.claude/settings.json`
+
+**解决方案**：
+
+**方法一（推荐）**：在项目的 `.env` 文件中添加：
+```env
+CLAUDE_CONFIG_DIR=G:/software/cc-haha/.claude_config
+```
+然后重启终端或重新执行 `claude-haha`。
+
+**方法二**：临时测试时使用环境变量覆盖：
+```bash
+CLAUDE_CONFIG_DIR=./.claude_config ./bin/claude-haha
+```
+
+**方法三**：清除全局配置干扰（如果需要）：
+```bash
+# 临时忽略全局配置
+CLAUDE_CODE_DISABLE_GLOBAL_CONFIG=1 ./bin/claude-haha
+```
+
+**验证配置生效**：
+启动后使用 `/buddy` 命令查看当前配置目录，或检查是否读取了预期的 API 设置。
+
+---
+
 ### Q: 怎么接入 OpenAI / DeepSeek / Ollama 等非 Anthropic 模型？
 
 本项目只支持 Anthropic 协议。如果模型供应商不直接支持 Anthropic 协议，需要用 [LiteLLM](https://github.com/BerriAI/litellm) 等代理做协议转换（OpenAI → Anthropic）。
